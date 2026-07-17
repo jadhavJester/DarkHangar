@@ -1,0 +1,345 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Share+Tech+Mono&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ══════════════════════════════════════════════════
+   Dark Hangar — Global Design Tokens & Base Styles
+   ══════════════════════════════════════════════════ */
+:root {
+  --bg-primary:     #0b0d10;
+  --bg-panel:       #14181c;
+  --accent-yellow:  #f2c30f;
+  --chrome-hi:      #4a4e55;
+  --chrome-lo:      #1c1e22;
+  --needle-red:     #c81e1e;
+  --healthy-green:  #2f9e44;
+  --grid-line:      #2a2f36;
+  --text-primary:   #e8ecf0;
+  --text-dim:       #6b7280;
+  --panel-glow:     rgba(242, 195, 15, 0.08);
+  --border-subtle:  rgba(255, 255, 255, 0.05);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+body {
+  margin: 0;
+  font-family: 'Share Tech Mono', monospace;
+  background: var(--bg-primary);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-panel);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--grid-line);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--chrome-hi);
+}
+
+/* ══════════════════════════════════════════════════
+   Panel Component
+   ══════════════════════════════════════════════════ */
+.dh-panel {
+  background: var(--bg-panel);
+  background-image: repeating-linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.015) 0px,
+    rgba(255, 255, 255, 0.015) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  border-radius: 12px;
+  border: 1px solid var(--border-subtle);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    0 0 18px var(--panel-glow),
+    0 4px 24px rgba(0, 0, 0, 0.6);
+  position: relative;
+  overflow: hidden;
+}
+
+.dh-panel::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(255,255,255,0.02) 0%, transparent 40%);
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+/* Panel header bar */
+.dh-panel-header {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent-yellow);
+  padding: 8px 12px 6px;
+  border-bottom: 1px solid var(--grid-line);
+  background: rgba(0, 0, 0, 0.2);
+}
+
+/* Rivet decoration */
+.dh-rivet {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, var(--chrome-hi), var(--chrome-lo));
+  border: 1px solid rgba(255,255,255,0.1);
+  position: absolute;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.8);
+}
+.dh-rivet.tl { top: 6px;  left:  6px; }
+.dh-rivet.tr { top: 6px;  right: 6px; }
+.dh-rivet.bl { bottom: 6px; left:  6px; }
+.dh-rivet.br { bottom: 6px; right: 6px; }
+
+/* ══════════════════════════════════════════════════
+   LCD Readout
+   ══════════════════════════════════════════════════ */
+.dh-lcd {
+  font-family: 'Share Tech Mono', monospace;
+  color: var(--accent-yellow);
+  text-shadow: 0 0 12px rgba(242, 195, 15, 0.5);
+  line-height: 1;
+  display: inline-block;
+}
+.dh-lcd.value  { font-size: 2.5rem; }
+.dh-lcd.large  { font-size: 3.5rem; }
+.dh-lcd.unit   { font-size: 0.75rem; opacity: 0.7; }
+.dh-lcd.label  { font-size: 0.6rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-dim); }
+.dh-lcd.warn   { color: var(--needle-red); text-shadow: 0 0 12px rgba(200, 30, 30, 0.6); }
+.dh-lcd.good   { color: var(--healthy-green); text-shadow: 0 0 10px rgba(47, 158, 68, 0.5); }
+
+/* ══════════════════════════════════════════════════
+   Headings
+   ══════════════════════════════════════════════════ */
+.dh-title {
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: 0.05em;
+}
+.dh-subtitle {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.7rem;
+  color: var(--accent-yellow);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+/* ══════════════════════════════════════════════════
+   Gauge Container
+   ══════════════════════════════════════════════════ */
+.gauge-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.gauge-label {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.55rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+.gauge-value-text {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.75rem;
+  color: var(--accent-yellow);
+  text-shadow: 0 0 8px rgba(242, 195, 15, 0.4);
+}
+
+/* ══════════════════════════════════════════════════
+   Timeline Slider
+   ══════════════════════════════════════════════════ */
+.timeline-track {
+  position: relative;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--grid-line);
+  overflow: visible;
+}
+.timeline-fill {
+  height: 100%;
+  border-radius: 3px;
+  background: linear-gradient(90deg, var(--healthy-green), var(--accent-yellow));
+  transition: width 0.05s;
+}
+input[type='range'].dh-slider {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--grid-line);
+  outline: none;
+  cursor: pointer;
+}
+input[type='range'].dh-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--accent-yellow);
+  border: 2px solid var(--bg-primary);
+  box-shadow: 0 0 8px rgba(242, 195, 15, 0.6);
+  cursor: pointer;
+  transition: box-shadow 0.15s;
+}
+input[type='range'].dh-slider:hover::-webkit-slider-thumb {
+  box-shadow: 0 0 16px rgba(242, 195, 15, 0.9);
+}
+
+/* ══════════════════════════════════════════════════
+   Chart overrides (Recharts dark theme)
+   ══════════════════════════════════════════════════ */
+.recharts-cartesian-grid-horizontal line,
+.recharts-cartesian-grid-vertical line {
+  stroke: var(--grid-line) !important;
+  stroke-opacity: 0.6;
+}
+.recharts-tooltip-wrapper .recharts-default-tooltip {
+  background: var(--bg-panel) !important;
+  border: 1px solid var(--grid-line) !important;
+  border-radius: 6px !important;
+  color: var(--text-primary) !important;
+}
+.recharts-legend-item-text {
+  color: var(--text-dim) !important;
+}
+
+/* ══════════════════════════════════════════════════
+   Upload drag zone
+   ══════════════════════════════════════════════════ */
+.upload-zone {
+  border: 2px dashed var(--grid-line);
+  border-radius: 16px;
+  transition: all 0.2s ease;
+}
+.upload-zone.dragover {
+  border-color: var(--accent-yellow);
+  background: rgba(242, 195, 15, 0.03);
+  box-shadow: 0 0 30px rgba(242, 195, 15, 0.15);
+}
+
+/* ══════════════════════════════════════════════════
+   VU Meter progress animation
+   ══════════════════════════════════════════════════ */
+.vu-bar {
+  width: 8px;
+  border-radius: 2px;
+  animation: vu-pulse 0.6s ease-in-out infinite alternate;
+}
+@keyframes vu-pulse {
+  from { transform: scaleY(0.2); opacity: 0.4; }
+  to   { transform: scaleY(1);   opacity: 1;   }
+}
+
+/* ══════════════════════════════════════════════════
+   Flight card (sidebar)
+   ══════════════════════════════════════════════════ */
+.flight-card {
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border-left: 3px solid transparent;
+}
+.flight-card:hover {
+  border-left-color: var(--accent-yellow);
+  background: rgba(242, 195, 15, 0.04);
+}
+.flight-card.active {
+  border-left-color: var(--accent-yellow);
+  background: rgba(242, 195, 15, 0.07);
+}
+
+/* ══════════════════════════════════════════════════
+   Bat watermark (map overlay)
+   ══════════════════════════════════════════════════ */
+.bat-watermark {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 1000;
+  opacity: 0.04;
+}
+
+/* ══════════════════════════════════════════════════
+   Stat table (eCalc-style dense readouts)
+   ══════════════════════════════════════════════════ */
+.stat-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--grid-line);
+}
+.stat-row:last-child {
+  border-bottom: none;
+}
+.stat-label {
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+.stat-value {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.85rem;
+  color: var(--text-primary);
+}
+
+/* ══════════════════════════════════════════════════
+   Badge
+   ══════════════════════════════════════════════════ */
+.dh-badge {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.65rem;
+  padding: 2px 6px;
+  border-radius: 4px;
+  display: inline-block;
+}
+.dh-badge.ok   { background: rgba(47, 158, 68, 0.2);  color: var(--healthy-green); }
+.dh-badge.warn { background: rgba(242, 195, 15, 0.2); color: var(--accent-yellow); }
+.dh-badge.bad  { background: rgba(200, 30, 30, 0.2);  color: var(--needle-red); }
+
+/* ══════════════════════════════════════════════════
+   Leaflet dark override
+   ══════════════════════════════════════════════════ */
+.leaflet-container {
+  background: var(--bg-primary) !important;
+}
+.leaflet-bar a {
+  background: var(--bg-panel) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--grid-line) !important;
+}
+.leaflet-bar a:hover {
+  background: var(--dh-grid) !important;
+}

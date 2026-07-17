@@ -1,0 +1,13 @@
+@echo off
+title Dark Hangar
+echo.
+echo  ██████╗  █████╗ ██████╗ ██╗  ██╗
+echo  ██╔══██╗██╔══██╗██╔══██╗██║ ██╔╝
+echo  ██║  ██║███████║██████╔╝█████╔╝
+echo  ██║  ██║██╔══██║██╔══██╗██╔═██╗
+echo  ██████╔╝██║  ██║██║  ██║██║  ██╗
+echo  ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝
+echo     HANGAR — UAV Log Analyzer
+echo.
+cd /d "%~dp0backend"
+python app_launcher.py
