@@ -11,6 +11,10 @@ const ERRORS = {
   UNSUPPORTED: 'Only .BIN DataFlash log files are supported',
 };
 
+const IS_DEMO_MODE = !window.location.origin.includes('localhost') && 
+                     !window.location.origin.includes('127.0.0.1') && 
+                     !window.location.origin.includes('8765');
+
 export default function Upload({ onUploadSuccess }) {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('single'); // 'single' | 'folder'
@@ -31,6 +35,10 @@ export default function Upload({ onUploadSuccess }) {
 
   const handleFile = useCallback(async (file) => {
     if (!file) return;
+    if (IS_DEMO_MODE) {
+      setError("Log uploads are disabled in Web Demo mode. Download the desktop app to analyze your own DataFlash logs!");
+      return;
+    }
     if (!file.name.toLowerCase().endsWith('.bin')) {
       setError(ERRORS.UNSUPPORTED);
       return;
@@ -80,6 +88,10 @@ export default function Upload({ onUploadSuccess }) {
   };
 
   const handleScanFolder = async () => {
+    if (IS_DEMO_MODE) {
+      setScanError("Directory scanning is disabled in Web Demo mode. Download the desktop app to import logs!");
+      return;
+    }
     setScanning(true);
     setScanError(null);
     setScanResult(null);
@@ -113,6 +125,20 @@ export default function Upload({ onUploadSuccess }) {
           ArduPilot DataFlash .BIN format
         </p>
       </div>
+
+      {/* Navigation & Warnings */}
+      {IS_DEMO_MODE && (
+        <div className="dh-panel mb-6 p-4 w-full max-w-2xl text-center"
+             style={{ borderLeft: '3px solid var(--accent-yellow)', background: 'rgba(210, 161, 0, 0.05)' }}>
+          <div className="dh-lcd label" style={{ color: 'var(--accent-yellow)', marginBottom: 4 }}>
+            ⚡ WEB DEMO MODE ACTIVE
+          </div>
+          <div className="dh-lcd" style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>
+            Uploading and scanning features require the Windows desktop app. 
+            View pre-loaded flights or download the app via GitHub.
+          </div>
+        </div>
+      )}
 
       {/* Navigation Buttons for Tabs */}
       <div className="flex gap-4 mb-6">

@@ -9,6 +9,10 @@ import TrackMap from '../components/TrackMap';
 import { useFlight } from '../hooks/useFlight';
 import { useTimeline } from '../hooks/useTimeline';
 
+const IS_DEMO_MODE = !window.location.origin.includes('localhost') && 
+                     !window.location.origin.includes('127.0.0.1') && 
+                     !window.location.origin.includes('8765');
+
 export default function Dashboard() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -53,6 +57,10 @@ export default function Dashboard() {
         <div className="flex items-center gap-2">
           <button
             onClick={() => {
+              if (IS_DEMO_MODE) {
+                alert("PDF report generation requires the local desktop application. Download it from the GitHub releases page to generate reports for your own flights!");
+                return;
+              }
               const api = window.location.origin.includes('5173') ? 'http://localhost:8000' : '';
               window.open(`${api}/flights/${m.id}/export/pdf`, '_blank');
             }}
@@ -64,6 +72,10 @@ export default function Dashboard() {
 
           <button
             onClick={() => {
+              if (IS_DEMO_MODE) {
+                alert("MATLAB export requires the local desktop application. Download it from the GitHub releases page to export your own flight telemetry!");
+                return;
+              }
               const api = window.location.origin.includes('5173') ? 'http://localhost:8000' : '';
               window.open(`${api}/flights/${m.id}/export/mat`, '_blank');
             }}

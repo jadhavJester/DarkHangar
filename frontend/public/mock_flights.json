@@ -1,0 +1,31 @@
+{
+  "flights": [
+    {
+      "id": 2,
+      "filename": "00000002.BIN (Web Demo)",
+      "uploaded_at": "2026-07-17 06:54:37",
+      "log_date": "2026-07-09",
+      "duration_min": 0.28,
+      "total_distance_km": 0.0024,
+      "energy_wh": 2.135,
+      "efficiency_wh_per_km": 889.58,
+      "efficiency_wh_per_min": 7.63,
+      "avg_airspeed_ms": null,
+      "max_airspeed_ms": null,
+      "max_altitude_m": 0.14,
+      "min_altitude_m": -0.13,
+      "max_current_a": 29.29,
+      "min_voltage_v": 15.43,
+      "climb_rate_max_ms": 1.35,
+      "descent_rate_max_ms": -1.54,
+      "glide_ratio": null,
+      "vibe_health": "ok",
+      "has_airspeed": 0,
+      "has_gps": 1,
+      "has_battery": 1,
+      "notes": "This flight is running in online demo mode. Upload and download features are simulated.",
+      "timeseries_path": "mock_timeseries.json",
+      "events": [{"id": 6, "flight_id": 2, "time_us": 32666922, "event_type": "MODE", "value": {"mode": "5", "mode_num": 5}}]
+    }
+  ]
+}
