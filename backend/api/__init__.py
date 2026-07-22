@@ -1,1 +1,1 @@
-"""Dark Hangar API package"""
+"""API package"""

@@ -10,7 +10,7 @@ import tempfile
 import logging
 from typing import Optional
 
-log = logging.getLogger("dark_hangar.parser")
+log = logging.getLogger("flight_analyzer.parser")
 
 
 def _safe_float(v) -> Optional[float]:
@@ -51,6 +51,8 @@ def parse_bin_log(filepath: str) -> dict:
             "vibe": {"time_s": [], "vibe_x": [], "vibe_y": [], "vibe_z": []},
             "wind": {"time_s": [], "direction": [], "speed": []},
         },
+        "params": {},
+        "messages": [],
         "events": [],
         "meta": {
             "has_gps": False,
@@ -215,6 +217,22 @@ def parse_bin_log(filepath: str) -> dict:
                 ts["wind"]["direction"].append(direction)
                 ts["wind"]["speed"].append(speed if speed is not None else 0.0)
 
+        # ── Parameters ───────────────────────────────────────────────────────
+        elif mtype == "PARM":
+            name = getattr(msg, "Name", None)
+            value = _safe_float(getattr(msg, "Value", None))
+            if name is not None:
+                result["params"][name.strip()] = value
+
+        # ── Text Messages ────────────────────────────────────────────────────
+        elif mtype == "MSG":
+            msg_text = getattr(msg, "Message", None)
+            if msg_text is not None and time_s is not None:
+                result["messages"].append({
+                    "time_s": round(time_s, 3),
+                    "message": str(msg_text).strip(),
+                })
+
         # ── Events ───────────────────────────────────────────────────────────
         elif mtype == "MODE":
             mode = getattr(msg, "Mode", None)
@@ -246,7 +264,9 @@ def parse_bin_log(filepath: str) -> dict:
     log.info(
         f"GPS points: {len(ts['gps']['time_s'])}, "
         f"BAT points: {len(ts['bat']['time_s'])}, "
-        f"ARSP points: {len(ts['arsp']['time_s'])}"
+        f"ARSP points: {len(ts['arsp']['time_s'])}, "
+        f"Params: {len(result['params'])}, "
+        f"Messages: {len(result['messages'])}"
     )
 
     return result

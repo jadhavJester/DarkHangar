@@ -4,14 +4,14 @@ import {
   Tooltip, Legend, ResponsiveContainer,
 } from 'recharts';
 
-const GRID_COLOR = '#2a2f36';
+const GRID_COLOR = 'rgba(214, 201, 176, 0.12)';
 
 const METRICS = [
-  { key: 'efficiency_wh_per_km',  label: 'Efficiency (Wh/km)',   color: '#2f9e44', unit: 'Wh/km' },
-  { key: 'total_distance_km',     label: 'Distance (km)',          color: '#f2c30f', unit: 'km' },
+  { key: 'efficiency_wh_per_km',  label: 'Efficiency (Wh/km)',   color: '#3a7d4a', unit: 'Wh/km' },
+  { key: 'total_distance_km',     label: 'Distance (km)',          color: '#b8860b', unit: 'km' },
   { key: 'duration_min',          label: 'Duration (min)',          color: '#6b9ef0', unit: 'min' },
-  { key: 'energy_wh',             label: 'Energy (Wh)',             color: '#c81e1e', unit: 'Wh' },
-  { key: 'max_airspeed_ms',       label: 'Max Airspeed (m/s)',      color: '#a78bfa', unit: 'm/s' },
+  { key: 'energy_wh',             label: 'Energy (Wh)',             color: '#b33030', unit: 'Wh' },
+  { key: 'max_airspeed_ms',       label: 'Max Airspeed (m/s)',      color: '#8b5cf6', unit: 'm/s' },
 ];
 
 /**
@@ -49,22 +49,27 @@ export function TrendChart({ flights, metricKey }) {
       <div className="dh-lcd label mb-2">{metric.label}</div>
       <ResponsiveContainer width="100%" height={120}>
         <LineChart data={data}>
-          <CartesianGrid strokeDasharray="3 3" stroke={GRID_COLOR} strokeOpacity={0.6} />
+          <CartesianGrid strokeDasharray="3 3" stroke={GRID_COLOR} strokeOpacity={1} />
           <XAxis
             dataKey="name"
-            tick={{ fill: '#6b7280', fontSize: 9, fontFamily: '"Share Tech Mono"' }}
+            tick={{ fill: 'rgba(200,185,160,0.4)', fontSize: 9, fontFamily: '"JetBrains Mono"' }}
             stroke={GRID_COLOR}
           />
           <YAxis
-            tick={{ fill: metric.color, fontSize: 9, fontFamily: '"Share Tech Mono"' }}
+            tick={{ fill: metric.color, fontSize: 9, fontFamily: '"JetBrains Mono"' }}
             stroke={GRID_COLOR}
             width={40}
           />
           <Tooltip
             contentStyle={{
-              background: '#14181c', border: '1px solid #2a2f36',
-              borderRadius: 4, fontFamily: '"Share Tech Mono"', fontSize: '0.7rem',
-              color: '#e8ecf0',
+              background: 'rgba(250, 246, 238, 0.92)',
+              backdropFilter: 'blur(12px)',
+              border: '1px solid rgba(184, 134, 11, 0.15)',
+              borderRadius: 8,
+              fontFamily: '"JetBrains Mono"',
+              fontSize: '0.7rem',
+              color: '#2c2416',
+              boxShadow: '0 0 20px rgba(0,0,0,0.06)',
             }}
             formatter={(v) => [`${Number(v).toFixed(2)} ${metric.unit}`, metric.label]}
           />

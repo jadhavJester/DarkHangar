@@ -1,9 +1,8 @@
 """
-Dark Hangar — Desktop Application Launcher
-==========================================
+Flight Log Analyzer — Desktop Application Launcher
+==================================================
 Starts the FastAPI server in a background thread, then opens a native OS
-window via pywebview. When packaged with PyInstaller this becomes a
-standalone DarkHangar.exe.
+window via pywebview.
 
 Usage (development):
     python app_launcher.py
@@ -19,11 +18,24 @@ import threading
 import logging
 
 # ── Logging ───────────────────────────────────────────────────────────────────
+_log_file = os.path.join(os.path.expanduser("~"), "flight_analyzer_debug.log")
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+    filename=_log_file,
+    filemode="w",
+    force=True
 )
-log = logging.getLogger("dark_hangar")
+log = logging.getLogger("flight_analyzer")
+log.info(f"Logging initialized. Writing debug log to {_log_file}")
+
+def handle_exception(exc_type, exc_value, exc_traceback):
+    if issubclass(exc_type, KeyboardInterrupt):
+        sys.__excepthook__(exc_type, exc_value, exc_traceback)
+        return
+    log.critical("Uncaught exception:", exc_info=(exc_type, exc_value, exc_traceback))
+
+sys.excepthook = handle_exception
 
 # ── Resolve base directory (works both in dev and PyInstaller bundle) ──────────
 if getattr(sys, "frozen", False):
@@ -48,36 +60,49 @@ def _find_free_port(start: int = 8765) -> int:
     return start
 
 
-def _wait_for_server(port: int, timeout: float = 15.0) -> bool:
+def _wait_for_server(port: int, timeout: float = 45.0) -> bool:
     """Poll until the server is accepting connections."""
+    log.info(f"Waiting for server on port {port}...")
     deadline = time.time() + timeout
+    attempt = 0
     while time.time() < deadline:
+        attempt += 1
         try:
+            log.info(f"Attempt {attempt}: trying to connect to 127.0.0.1:{port}")
             with socket.create_connection(("127.0.0.1", port), timeout=0.5):
+                log.info("Socket connection succeeded!")
                 return True
-        except (ConnectionRefusedError, OSError):
+        except (ConnectionRefusedError, OSError) as e:
+            log.info(f"Attempt {attempt} failed: {e}")
             time.sleep(0.2)
+    log.info("Server wait timeout exceeded!")
     return False
 
 
 def _start_server(port: int):
     """Start uvicorn in this thread (blocks until shutdown)."""
-    import uvicorn
-    import main
-    uvicorn.run(
-        main.app,
-        host="127.0.0.1",
-        port=port,
-        log_level="warning",
-        access_log=False,
-    )
+    try:
+        log.info("Server thread started. Importing uvicorn and main...")
+        import uvicorn
+        import main
+        log.info("uvicorn and main imported. Running app...")
+        uvicorn.run(
+            main.app,
+            host="127.0.0.1",
+            port=port,
+            log_level="warning",
+            access_log=False,
+        )
+        log.info("uvicorn server stopped.")
+    except Exception as e:
+        log.exception("Error in server thread:")
 
 
 def main():
     port = _find_free_port(8765)
     url  = f"http://127.0.0.1:{port}"
 
-    log.info(f"Starting Dark Hangar server on port {port}…")
+    log.info(f"Starting server on port {port}…")
 
     server_thread = threading.Thread(
         target=_start_server, args=(port,), daemon=True, name="dark-hangar-server"
@@ -109,19 +134,23 @@ def main():
             pass
         return
 
-    window = webview.create_window(
-        title="Dark Hangar — UAV Flight Log Analyzer",
-        url=url,
-        width=1440,
-        height=900,
-        min_size=(1024, 680),
-        resizable=True,
-        text_select=False,
-        background_color="#0b0d10",
-    )
-
-    webview.start(debug=False, private_mode=False)
-    log.info("Window closed. Shutting down.")
+    try:
+        log.info("Creating webview window...")
+        window = webview.create_window(
+            title="Flight Log Analyzer",
+            url=url,
+            width=1440,
+            height=900,
+            min_size=(1024, 680),
+            resizable=True,
+            text_select=False,
+            background_color="#0b0d10",
+        )
+        log.info("Starting webview...")
+        webview.start(debug=False, private_mode=False)
+        log.info("Window closed. Shutting down.")
+    except Exception as e:
+        log.exception("Error in webview initialization or main loop:")
 
 
 if __name__ == "__main__":

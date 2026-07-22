@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 
 /**
- * AnalogGauge — canvas-gauges RadialGauge wrapper.
+ * AnalogGauge — canvas-gauges RadialGauge with translucent glass plate.
  *
  * Props:
  *   value      — current reading
@@ -28,7 +28,6 @@ export default function AnalogGauge({
   useEffect(() => {
     if (!canvasRef.current) return;
 
-    // Dynamic import to avoid SSR issues
     import('canvas-gauges').then(({ RadialGauge }) => {
       const highlights = [];
 
@@ -36,14 +35,14 @@ export default function AnalogGauge({
         highlights.push({
           from: min,
           to: greenZoneEnd,
-          color: 'rgba(47, 158, 68, 0.35)',
+          color: 'rgba(74, 224, 96, 0.18)',
         });
       }
       if (redZoneStart != null) {
         highlights.push({
           from: redZoneStart,
           to: max,
-          color: 'rgba(200, 30, 30, 0.45)',
+          color: 'rgba(224, 64, 64, 0.22)',
         });
       }
 
@@ -57,40 +56,41 @@ export default function AnalogGauge({
         minValue: min,
         maxValue: max,
 
-        // Colors — Dark Hangar palette
-        colorPlate:           '#0b0d10',
-        colorPlateEnd:        '#14181c',
-        colorBorderOuter:     '#1c1e22',
-        colorBorderOuterEnd:  '#0b0d10',
-        colorBorderMiddle:    '#4a4e55',
-        colorBorderMiddleEnd: '#1c1e22',
-        colorBorderInner:     '#2a2f36',
-        colorBorderInnerEnd:  '#14181c',
-        colorNeedle:          '#c81e1e',
-        colorNeedleEnd:       '#ff2222',
-        colorNeedleShadowUp:  'rgba(0,0,0,0.6)',
-        colorNeedleShadowDown:'rgba(0,0,0,0.8)',
-        colorTitle:           '#6b7280',
-        colorUnits:           '#f2c30f',
-        colorNumbers:         '#e8ecf0',
-        colorMajorTicks:      '#4a4e55',
-        colorMinorTicks:      '#2a2f36',
+        // Translucent glass plate
+        colorPlate:           'rgba(250, 246, 238, 0.15)',
+        colorPlateEnd:        'rgba(250, 246, 238, 0.08)',
+        colorBorderOuter:     'rgba(184, 134, 11, 0.12)',
+        colorBorderOuterEnd:  'rgba(184, 134, 11, 0.06)',
+        colorBorderMiddle:    'rgba(255, 255, 255, 0.10)',
+        colorBorderMiddleEnd: 'rgba(255, 255, 255, 0.05)',
+        colorBorderInner:     'rgba(255, 255, 255, 0.08)',
+        colorBorderInnerEnd:  'rgba(255, 255, 255, 0.03)',
+
+        colorNeedle:          '#b33030',
+        colorNeedleEnd:       '#b33030',
+        colorNeedleShadowUp:  'rgba(0,0,0,0)',
+        colorNeedleShadowDown:'rgba(0,0,0,0)',
+        colorTitle:           'rgba(139, 125, 107, 0.6)',
+        colorUnits:           'rgba(139, 125, 107, 0.5)',
+        colorNumbers:         '#2c2416',
+        colorMajorTicks:      'rgba(139, 115, 85, 0.4)',
+        colorMinorTicks:      'rgba(214, 201, 176, 0.25)',
 
         // Style
-        borderOuterWidth: 3,
-        borderMiddleWidth: 2,
-        borderInnerWidth: 2,
+        borderOuterWidth: 1,
+        borderMiddleWidth: 0,
+        borderInnerWidth: 0,
         borderShadowWidth: 0,
         needle: true,
         needleType: 'arrow',
-        needleWidth: 2.5,
-        needleCircleSize: 7,
-        needleCircleOuter: true,
+        needleWidth: 2,
+        needleCircleSize: 5,
+        needleCircleOuter: false,
         needleCircleInner: false,
-        colorNeedleCircleOuter:    '#2a2f36',
-        colorNeedleCircleOuterEnd: '#14181c',
-        colorNeedleCircleInner:    '#c81e1e',
-        colorNeedleCircleInnerEnd: '#c81e1e',
+        colorNeedleCircleOuter:    '#b33030',
+        colorNeedleCircleOuterEnd: '#b33030',
+        colorNeedleCircleInner:    '#b33030',
+        colorNeedleCircleInnerEnd: '#b33030',
 
         animationDuration: 300,
         animationRule: 'linear',
@@ -105,8 +105,7 @@ export default function AnalogGauge({
         fontUnitsSize: 22,
         fontNumbersSize: 18,
 
-        // Shadow glow effect on the plate
-        shadows: true,
+        shadows: false,
       });
 
       gauge.draw();
@@ -122,7 +121,6 @@ export default function AnalogGauge({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [min, max, unit, label, size, redZoneStart, greenZoneEnd]);
 
-  // Update value without re-creating the gauge
   useEffect(() => {
     if (gaugeRef.current) {
       gaugeRef.current.value = value;

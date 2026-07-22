@@ -5,21 +5,14 @@ import Panel from '../components/Panel';
 
 const API = window.location.origin.includes('5173') ? 'http://localhost:8000' : '';
 
-const ERRORS = {
-  NO_GPS: 'No valid GPS data found in log',
-  CORRUPT: 'Could not parse log',
-  UNSUPPORTED: 'Only .BIN DataFlash log files are supported',
-};
-
 const IS_DEMO_MODE = !window.location.origin.includes('localhost') && 
                      !window.location.origin.includes('127.0.0.1') && 
                      !window.location.origin.includes('8765');
 
 export default function Upload({ onUploadSuccess }) {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('single'); // 'single' | 'folder'
+  const [activeTab, setActiveTab] = useState('single');
   
-  // Single upload state
   const [dragOver, setDragOver]   = useState(false);
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress]   = useState(0);
@@ -27,7 +20,6 @@ export default function Upload({ onUploadSuccess }) {
   const [warnings, setWarnings]   = useState([]);
   const [result, setResult]       = useState(null);
 
-  // Folder scan state
   const [folderPath, setFolderPath] = useState('D:\\SILVER Wing LOGS\\APM\\LOGS');
   const [scanning, setScanning]     = useState(false);
   const [scanResult, setScanResult] = useState(null);
@@ -36,11 +28,11 @@ export default function Upload({ onUploadSuccess }) {
   const handleFile = useCallback(async (file) => {
     if (!file) return;
     if (IS_DEMO_MODE) {
-      setError("Log uploads are disabled in Web Demo mode. Download the desktop app to analyze your own DataFlash logs!");
+      setError("Uploads disabled in demo mode. Download the desktop app to analyze your own logs.");
       return;
     }
     if (!file.name.toLowerCase().endsWith('.bin')) {
-      setError(ERRORS.UNSUPPORTED);
+      setError("Only .BIN DataFlash log files are supported.");
       return;
     }
 
@@ -57,7 +49,7 @@ export default function Upload({ onUploadSuccess }) {
       const res = await axios.post(`${API}/flights/upload`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
         onUploadProgress: (e) => {
-          setProgress(Math.round((e.loaded / e.total) * 40)); // Upload = 0–40%
+          setProgress(Math.round((e.loaded / e.total) * 40));
         },
       });
 
@@ -65,12 +57,9 @@ export default function Upload({ onUploadSuccess }) {
       setResult(res.data);
       setWarnings(res.data.warnings || []);
       onUploadSuccess?.();
-
-      // Navigate to dashboard after short delay
       setTimeout(() => navigate(`/flights/${res.data.id}`), 1200);
     } catch (e) {
-      const detail = e?.response?.data?.detail || e.message;
-      setError(detail);
+      setError(e?.response?.data?.detail || e.message);
     } finally {
       setUploading(false);
     }
@@ -79,17 +68,14 @@ export default function Upload({ onUploadSuccess }) {
   const onDrop = useCallback((e) => {
     e.preventDefault();
     setDragOver(false);
-    const file = e.dataTransfer.files[0];
-    handleFile(file);
+    handleFile(e.dataTransfer.files[0]);
   }, [handleFile]);
 
-  const onInputChange = (e) => {
-    handleFile(e.target.files[0]);
-  };
+  const onInputChange = (e) => handleFile(e.target.files[0]);
 
   const handleScanFolder = async () => {
     if (IS_DEMO_MODE) {
-      setScanError("Directory scanning is disabled in Web Demo mode. Download the desktop app to import logs!");
+      setScanError("Directory scanning requires the desktop app.");
       return;
     }
     setScanning(true);
@@ -97,15 +83,10 @@ export default function Upload({ onUploadSuccess }) {
     setScanResult(null);
     try {
       const res = await axios.post(`${API}/flights/scan-folder`, {
-        folder_path: folderPath,
-        skip_existing: true
+        folder_path: folderPath, skip_existing: true
       });
-      if (res.data.error) {
-        setScanError(res.data.error);
-      } else {
-        setScanResult(res.data);
-        onUploadSuccess?.();
-      }
+      if (res.data.error) setScanError(res.data.error);
+      else { setScanResult(res.data); onUploadSuccess?.(); }
     } catch (e) {
       setScanError(e?.response?.data?.detail || e.message);
     } finally {
@@ -114,252 +95,190 @@ export default function Upload({ onUploadSuccess }) {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-8"
+    <div className="min-h-screen flex flex-col items-center justify-center p-6"
          style={{ background: 'var(--bg-primary)' }}>
 
-      {/* Header */}
-      <div className="mb-8 text-center">
-        <div className="dh-subtitle mb-2">Dark Hangar</div>
-        <h1 className="dh-title text-4xl mb-2">Load Flight Logs</h1>
-        <p className="text-sm" style={{ color: 'var(--text-dim)', fontFamily: '"Share Tech Mono"' }}>
-          ArduPilot DataFlash .BIN format
-        </p>
+      <div className="mb-6 text-center">
+        <h1 className="dh-title text-3xl mb-1">Load Flight Logs</h1>
+        <p className="text-xs" style={{ color: 'var(--text-dim)' }}>ArduPilot DataFlash .BIN format</p>
       </div>
 
-      {/* Navigation & Warnings */}
       {IS_DEMO_MODE && (
-        <div className="dh-panel mb-6 p-4 w-full max-w-2xl text-center"
-             style={{ borderLeft: '3px solid var(--accent-yellow)', background: 'rgba(210, 161, 0, 0.05)' }}>
-          <div className="dh-lcd label" style={{ color: 'var(--accent-yellow)', marginBottom: 4 }}>
-            ⚡ WEB DEMO MODE ACTIVE
-          </div>
-          <div className="dh-lcd" style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>
-            Uploading and scanning features require the Windows desktop app. 
-            View pre-loaded flights or download the app via GitHub.
-          </div>
+        <div className="mb-4 px-4 py-2 text-center" style={{
+          background: 'rgba(242,195,15,0.05)', border: '1px solid rgba(242,195,15,0.2)', borderRadius: 4,
+        }}>
+          <span className="dh-lcd label" style={{ fontSize: '0.55rem', color: 'var(--accent)' }}>
+            Demo Mode — Download the desktop app to analyze your own logs
+          </span>
         </div>
       )}
 
-      {/* Navigation Buttons for Tabs */}
-      <div className="flex gap-4 mb-6">
-        <button
-          onClick={() => setActiveTab('single')}
-          className={`dh-panel px-6 py-2 dh-subtitle transition-all ${activeTab === 'single' ? 'shadow-bat-glow-strong text-dh-accent' : 'opacity-65'}`}
-          style={{ cursor: 'pointer', fontSize: '0.75rem' }}
-        >
-          Single Log Upload
+      <div className="flex gap-3 mb-4">
+        <button onClick={() => setActiveTab('single')}
+          className={`dh-btn-flat px-4 py-1.5 ${activeTab === 'single' ? 'active' : ''}`}>
+          Upload File
         </button>
-        <button
-          onClick={() => setActiveTab('folder')}
-          className={`dh-panel px-6 py-2 dh-subtitle transition-all ${activeTab === 'folder' ? 'shadow-bat-glow-strong text-dh-accent' : 'opacity-65'}`}
-          style={{ cursor: 'pointer', fontSize: '0.75rem' }}
-        >
-          Import Local Folder
+        <button onClick={() => setActiveTab('folder')}
+          className={`dh-btn-flat px-4 py-1.5 ${activeTab === 'folder' ? 'active' : ''}`}>
+          Import Folder
         </button>
-        <button
-          onClick={() => navigate('/history')}
-          className="dh-panel px-6 py-2 dh-subtitle opacity-50 hover:opacity-100 transition-all"
-          style={{ cursor: 'pointer', fontSize: '0.75rem' }}
-        >
-          ← Flight History
-        </button>
+        <button onClick={() => navigate('/history')}
+          className="dh-btn-flat px-4 py-1.5">← History</button>
       </div>
 
       {activeTab === 'single' ? (
         <>
-          {/* Upload Zone */}
-          <div
-            className={`upload-zone ${dragOver ? 'dragover' : ''} w-full max-w-2xl p-16 flex flex-col items-center gap-6 cursor-pointer`}
+          <div className="w-full max-w-lg p-12 flex flex-col items-center gap-4 cursor-pointer"
+            style={{
+              border: `1px dashed ${dragOver ? 'var(--accent)' : 'var(--grid-line)'}`,
+              borderRadius: 4,
+              background: dragOver ? 'rgba(242,195,15,0.04)' : 'transparent',
+              transition: 'all 0.2s',
+            }}
             onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
             onDragLeave={() => setDragOver(false)}
             onDrop={onDrop}
             onClick={() => document.getElementById('bin-file-input').click()}
           >
-            <input
-              id="bin-file-input"
-              type="file"
-              accept=".bin,.BIN"
-              className="hidden"
-              onChange={onInputChange}
-            />
+            <input id="bin-file-input" type="file" accept=".bin,.BIN" className="hidden" onChange={onInputChange} />
 
             {!uploading && !result && (
               <>
-                {/* Icon */}
-                <svg width="64" height="64" viewBox="0 0 64 64" fill="none"
-                     style={{ opacity: dragOver ? 1 : 0.4, transition: 'opacity 0.2s' }}>
-                  <path d="M32 4C19 4 8 15 8 28c0 8 4 15 10 20H20l12-12 12 12h-2c6-5 10-12 10-20 0-13-11-24-20-24z"
-                        fill="#f2c30f" fillOpacity="0.3"/>
-                  <path d="M32 14v20M22 24l10-10 10 10" stroke="#f2c30f" strokeWidth="2.5"
-                        strokeLinecap="round" strokeLinejoin="round"/>
-                  <rect x="18" y="46" width="28" height="4" rx="2" fill="#f2c30f" fillOpacity="0.4"/>
-                </svg>
-
+                <div style={{ fontSize: '2rem', opacity: dragOver ? 1 : 0.4, color: 'var(--accent)' }}>⤴</div>
                 <div className="text-center">
-                  <p className="dh-title text-lg mb-2">
-                    {dragOver ? 'Drop to upload' : 'Drag & drop your .BIN log'}
+                  <p className="dh-title" style={{ fontSize: '1rem', marginBottom: 4 }}>
+                    {dragOver ? 'Drop to upload' : 'Drag & drop a .BIN log'}
                   </p>
                   <p className="dh-lcd label">or click to browse</p>
                 </div>
               </>
             )}
 
-            {/* VU Meter Progress */}
             {uploading && (
-              <div className="flex flex-col items-center gap-6 w-full">
-                <div className="dh-title text-lg">Parsing flight data…</div>
+              <div className="flex flex-col items-center gap-4 w-full">
+                <div className="dh-title" style={{ fontSize: '0.9rem' }}>Parsing flight data...</div>
                 <VUMeter progress={progress} />
-                <p className="dh-lcd label">{progress < 40 ? 'Uploading…' : 'Extracting telemetry…'}</p>
+                <p className="dh-lcd label">{progress < 40 ? 'Uploading...' : 'Extracting telemetry...'}</p>
               </div>
             )}
 
-            {/* Success */}
             {result && !uploading && (
-              <div className="flex flex-col items-center gap-3">
-                <div style={{ color: 'var(--healthy-green)', fontSize: '2rem' }}>✓</div>
-                <div className="dh-title text-lg" style={{ color: 'var(--healthy-green)' }}>
-                  Log Parsed Successfully
+              <div className="flex flex-col items-center gap-2">
+                <div style={{ color: 'var(--healthy-green)', fontSize: '1.5rem' }}>✓</div>
+                <div className="dh-title" style={{ fontSize: '0.9rem', color: 'var(--healthy-green)' }}>
+                  Log Parsed — #{result.id}
                 </div>
-                <div className="dh-lcd label">
-                  {result.filename} → #{result.id}
-                </div>
-                <div className="dh-lcd" style={{ fontSize: '0.7rem' }}>
-                  Redirecting to dashboard…
-                </div>
+                <div className="dh-lcd label">Redirecting to dashboard...</div>
               </div>
             )}
           </div>
 
-          {/* Error */}
           {error && (
-            <div className="dh-panel mt-6 p-4 w-full max-w-2xl"
-                 style={{ borderLeft: '3px solid var(--needle-red)' }}>
-              <div className="dh-lcd label" style={{ color: 'var(--needle-red)', marginBottom: 4 }}>
-                Parse Error
-              </div>
-              <div className="dh-lcd" style={{ fontSize: '0.8rem', color: 'var(--text-primary)' }}>
-                {error}
-              </div>
+            <div className="w-full max-w-lg mt-4 p-3" style={{
+              borderLeft: '3px solid var(--needle-red)', background: 'var(--bg-panel)', borderRadius: 4,
+            }}>
+              <div className="dh-lcd label" style={{ color: 'var(--needle-red)', marginBottom: 2 }}>Error</div>
+              <div className="dh-lcd" style={{ fontSize: '0.75rem' }}>{error}</div>
             </div>
           )}
 
-          {/* Warnings */}
           {warnings.length > 0 && (
-            <div className="dh-panel mt-4 p-4 w-full max-w-2xl"
-                 style={{ borderLeft: '3px solid var(--accent-yellow)' }}>
-              <div className="dh-lcd label" style={{ color: 'var(--accent-yellow)', marginBottom: 4 }}>
-                Warnings
-              </div>
+            <div className="w-full max-w-lg mt-3 p-3" style={{
+              borderLeft: '3px solid var(--accent)', background: 'var(--bg-panel)', borderRadius: 4,
+            }}>
+              <div className="dh-lcd label" style={{ color: 'var(--accent)', marginBottom: 4 }}>Warnings</div>
               {warnings.map((w, i) => (
-                <div key={i} className="dh-lcd" style={{ fontSize: '0.75rem', color: 'var(--text-dim)', marginBottom: 2 }}>
-                  ⚠ {w}
-                </div>
+                <div key={i} className="dh-lcd" style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>{w}</div>
               ))}
             </div>
           )}
         </>
       ) : (
-        <div className="w-full max-w-2xl">
-          <Panel title="Scan & Bulk Import Flight Logs" className="p-6">
-            <div className="flex flex-col gap-4">
-              <div>
-                <label className="dh-lcd label block mb-1">Local Directory Path</label>
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={folderPath}
-                    onChange={(e) => setFolderPath(e.target.value)}
-                    className="flex-1 bg-[#14181c] border border-[#2a2f36] px-3 py-2 text-[#e8ecf0] font-mono text-sm rounded-md focus:outline-none focus:border-[#f2c30f]"
-                    placeholder="E.g. D:\SILVER Wing LOGS\APM\LOGS"
-                  />
-                  <button
-                    onClick={handleScanFolder}
-                    disabled={scanning}
-                    className="dh-panel px-6 py-2 dh-subtitle bg-[#2a2f36] hover:bg-[#3a3f46] text-[#f2c30f] disabled:opacity-50"
-                    style={{ cursor: 'pointer', fontSize: '0.75rem' }}
-                  >
-                    {scanning ? 'Scanning...' : 'Scan & Import'}
-                  </button>
+        <div className="w-full max-w-lg">
+          <Panel className="p-4">
+            <label className="dh-lcd label block mb-2">Local Directory Path</label>
+            <div className="flex gap-2 mb-3">
+              <input type="text" value={folderPath} onChange={(e) => setFolderPath(e.target.value)}
+                className="flex-1 px-3 py-1.5 text-sm font-mono"
+                style={{
+                  background: 'var(--bg-panel)', border: '1px solid var(--grid-line)', borderRadius: 2,
+                  color: 'var(--text-primary)', outline: 'none',
+                }}
+              />
+              <button onClick={handleScanFolder} disabled={scanning}
+                className="dh-btn-flat px-4 py-1.5 active font-bold disabled:opacity-50">
+                {scanning ? 'Scanning...' : 'Scan'}
+              </button>
+            </div>
+
+            {scanning && (
+              <div className="flex flex-col items-center py-6 gap-3">
+                <span className="dh-lcd label animate-pulse">Scanning folder...</span>
+                <div className="flex gap-2 justify-center">
+                  {[0, 1, 2, 3].map(i => (
+                    <div key={i} className="vu-bar" style={{
+                      height: 24, background: 'var(--accent)', animationDelay: `${i * 0.15}s`,
+                    }} />
+                  ))}
                 </div>
               </div>
+            )}
 
-              {scanning && (
-                <div className="flex flex-col items-center justify-center p-8 gap-4">
-                  <span className="dh-lcd label animate-pulse">Processing Flight Logs...</span>
-                  <div className="flex gap-2 justify-center">
-                    {[0, 1, 2, 3].map(i => (
-                      <div key={i} className="vu-bar" style={{
-                        height: 32, background: 'var(--accent-yellow)',
-                        animationDelay: `${i * 0.15}s`,
-                      }} />
-                    ))}
-                  </div>
-                </div>
-              )}
+            {scanError && (
+              <div className="p-3" style={{ borderLeft: '3px solid var(--needle-red)', background: 'var(--bg-primary)', borderRadius: 2, marginTop: 8 }}>
+                <div className="dh-lcd label" style={{ color: 'var(--needle-red)', marginBottom: 2 }}>Error</div>
+                <div className="dh-lcd" style={{ fontSize: '0.75rem' }}>{scanError}</div>
+              </div>
+            )}
 
-              {scanError && (
-                <div className="dh-panel p-4" style={{ borderLeft: '3px solid var(--needle-red)' }}>
-                  <div className="dh-lcd label" style={{ color: 'var(--needle-red)', marginBottom: 4 }}>Scan Error</div>
-                  <div className="dh-lcd" style={{ fontSize: '0.8rem' }}>{scanError}</div>
-                </div>
-              )}
-
-              {scanResult && (
-                <div className="flex flex-col gap-4 mt-2">
-                  <div className="flex justify-between items-center bg-[#0b0d10] p-3 rounded border border-[#2a2f36]">
-                    <div className="flex gap-4">
-                      <div className="text-center">
-                        <span className="dh-lcd label block" style={{ fontSize: '0.65rem' }}>Imported</span>
-                        <span className="dh-lcd text-lg text-emerald-500 font-bold">{scanResult.summary.imported}</span>
-                      </div>
-                      <div className="text-center border-l border-[#2a2f36] pl-4">
-                        <span className="dh-lcd label block" style={{ fontSize: '0.65rem' }}>Skipped</span>
-                        <span className="dh-lcd text-lg text-gray-400 font-bold">{scanResult.summary.skipped}</span>
-                      </div>
-                      <div className="text-center border-l border-[#2a2f36] pl-4">
-                        <span className="dh-lcd label block" style={{ fontSize: '0.65rem' }}>Errors</span>
-                        <span className="dh-lcd text-lg text-rose-500 font-bold">{scanResult.summary.errors}</span>
-                      </div>
+            {scanResult && (
+              <>
+                <div className="flex justify-between items-center p-2 mb-2" style={{
+                  background: 'var(--bg-primary)', border: '1px solid var(--grid-line)', borderRadius: 2,
+                }}>
+                  <div className="flex gap-3">
+                    <div className="text-center">
+                      <span className="dh-lcd label block">Imported</span>
+                      <span className="dh-lcd" style={{ fontSize: '1rem', color: 'var(--healthy-green)' }}>{scanResult.summary.imported}</span>
                     </div>
-                    <button
-                      onClick={() => navigate('/history')}
-                      className="dh-subtitle text-[#f2c30f]"
-                      style={{ fontSize: '0.65rem', cursor: 'pointer' }}
-                    >
-                      View in Ledger →
-                    </button>
+                    <div className="text-center px-3" style={{ borderLeft: '1px solid var(--grid-line)' }}>
+                      <span className="dh-lcd label block">Skipped</span>
+                      <span className="dh-lcd" style={{ fontSize: '1rem', opacity: 0.6 }}>{scanResult.summary.skipped}</span>
+                    </div>
+                    <div className="text-center" style={{ borderLeft: '1px solid var(--grid-line)', paddingLeft: 12 }}>
+                      <span className="dh-lcd label block">Errors</span>
+                      <span className="dh-lcd" style={{ fontSize: '1rem', color: 'var(--needle-red)' }}>{scanResult.summary.errors}</span>
+                    </div>
                   </div>
-
-                  {/* File List */}
-                  <div className="max-h-60 overflow-y-auto flex flex-col gap-1 pr-1 border border-[#2a2f36] rounded p-2 bg-[#0b0d10]">
-                    {scanResult.results.map((res, i) => (
-                      <div key={i} className="flex justify-between items-center text-xs py-1 border-b border-[#1c1e22]/50 last:border-0 font-mono">
-                        <span className="text-gray-300 truncate max-w-xs">{res.filename}</span>
-                        <div className="flex gap-2 items-center">
-                          {res.status === 'imported' && (
-                            <span className="text-emerald-500 px-1 rounded bg-emerald-950/40 text-[10px]">IMPORTED</span>
-                          )}
-                          {res.status === 'skipped' && (
-                            <span className="text-gray-500 px-1 rounded bg-gray-900 text-[10px]">SKIPPED</span>
-                          )}
-                          {res.status === 'error' && (
-                            <span className="text-rose-500 px-1 rounded bg-rose-950/40 text-[10px]">ERROR</span>
-                          )}
-                          {res.message && <span className="text-[10px] text-gray-500 max-w-[150px] truncate" title={res.message}>{res.message}</span>}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                  <button onClick={() => navigate('/history')}
+                    className="dh-subtitle" style={{ fontSize: '0.55rem', cursor: 'pointer' }}>
+                    View →
+                  </button>
                 </div>
-              )}
-            </div>
+
+                <div className="max-h-48 overflow-y-auto" style={{ border: '1px solid var(--grid-line)', borderRadius: 2 }}>
+                  {scanResult.results.map((res, i) => (
+                    <div key={i} className="flex justify-between items-center text-xs px-2 py-1"
+                      style={{ borderBottom: i < scanResult.results.length - 1 ? '1px solid var(--grid-line)' : 'none' }}>
+                      <span className="truncate" style={{ color: 'var(--text-dim)', maxWidth: 280 }}>{res.filename}</span>
+                      <span style={{
+                        color: res.status === 'imported' ? 'var(--healthy-green)' :
+                               res.status === 'error' ? 'var(--needle-red)' : 'var(--text-dim)',
+                        fontSize: '0.5rem', fontFamily: 'var(--font-ui)', letterSpacing: '0.08em',
+                      }}>
+                        {res.status.toUpperCase()}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
           </Panel>
         </div>
       )}
 
-      {/* Bottom hint */}
-      <p className="mt-8 text-xs" style={{ color: 'var(--text-dim)', fontFamily: '"Share Tech Mono"' }}>
-        Supports ArduPilot DataFlash logs (00000001.BIN format) · Multiple uploads build your flight history
+      <p className="mt-6 text-xs" style={{ color: 'var(--text-dim)' }}>
+        ArduPilot DataFlash logs (.BIN) · Build your flight history
       </p>
     </div>
   );
@@ -368,24 +287,20 @@ export default function Upload({ onUploadSuccess }) {
 function VUMeter({ progress }) {
   const bars = 16;
   return (
-    <div className="flex items-end gap-1.5" style={{ height: 48 }}>
+    <div className="flex items-end gap-1" style={{ height: 40 }}>
       {Array.from({ length: bars }).map((_, i) => {
         const barPct = (i + 1) / bars;
         const active = barPct <= progress / 100;
         const color = barPct > 0.85 ? 'var(--needle-red)'
-          : barPct > 0.6 ? 'var(--accent-yellow)'
+          : barPct > 0.6 ? 'var(--accent)'
           : 'var(--healthy-green)';
         return (
-          <div
-            key={i}
-            className="vu-bar"
-            style={{
-              height: `${30 + (i / bars) * 70}%`,
-              background: active ? color : 'var(--grid-line)',
-              animationDelay: `${i * 0.04}s`,
-              animationPlayState: active ? 'running' : 'paused',
-            }}
-          />
+          <div key={i} className="vu-bar" style={{
+            height: `${24 + (i / bars) * 60}%`,
+            background: active ? color : 'var(--grid-line)',
+            animationDelay: `${i * 0.04}s`,
+            animationPlayState: active ? 'running' : 'paused',
+          }} />
         );
       })}
     </div>

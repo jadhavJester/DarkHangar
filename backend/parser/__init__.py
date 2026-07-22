@@ -1,1 +1,1 @@
-"""Dark Hangar parser package"""
+"""Parser package"""

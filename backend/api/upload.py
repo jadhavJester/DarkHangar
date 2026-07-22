@@ -13,7 +13,7 @@ from parser.bin_parser import parse_bin_log
 from parser.derived_metrics import compute_all
 from db.models import insert_flight, insert_events
 
-log = logging.getLogger("dark_hangar.upload")
+log = logging.getLogger("flight_analyzer.upload")
 
 router = APIRouter(prefix="/flights", tags=["upload"])
 

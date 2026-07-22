@@ -39,10 +39,24 @@ if exist "%~dp0backend\data" (
     xcopy "%~dp0backend\data" "%~dp0backend\dist\DarkHangar\data" /E /I /Y /Q >nul
 )
 
+REM Step 5: Create darkhangarv1 distribution folder
+echo.
+echo [5/5] Creating darkhangarv1 distribution package...
+if not exist "%~dp0darkhangarv1" (
+    mkdir "%~dp0darkhangarv1"
+)
+
+copy "%~dp0backend\dist\DarkHangarStandalone.exe" "%~dp0darkhangarv1\DarkHangar.exe" /Y >nul
+
+echo Zipping folder version (this might take a few seconds)...
+powershell -Command "Compress-Archive -Path '%~dp0backend\dist\DarkHangar' -DestinationPath '%~dp0darkhangarv1\DarkHangar_Folder_v1.zip' -Force"
+
 echo.
 echo Done!
 echo.
-echo   Executable: %~dp0backend\dist\DarkHangar\DarkHangar.exe
+echo   Distribution Directory: %~dp0darkhangarv1\
+echo   - Standalone EXE: %~dp0darkhangarv1\DarkHangar.exe
+echo   - Zip File:       %~dp0darkhangarv1\DarkHangar_Folder_v1.zip
 echo.
 echo ====================================================
 pause

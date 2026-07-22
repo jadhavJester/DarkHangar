@@ -1,1 +1,1 @@
-"""Dark Hangar DB package"""
+"""DB package"""

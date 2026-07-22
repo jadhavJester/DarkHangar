@@ -11,7 +11,7 @@ export default function Styleguide() {
         {/* Header */}
         <div className="mb-10">
           <div className="dh-subtitle mb-2">Design System</div>
-          <h1 className="dh-title text-4xl mb-4">Dark Hangar Styleguide</h1>
+          <h1 className="dh-title text-4xl mb-4">Styleguide</h1>
           <p className="dh-lcd label">
             Batman-noir × Retro Aviation × eCalc-density instrument panel
           </p>

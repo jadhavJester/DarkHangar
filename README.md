@@ -1,74 +1,62 @@
-# 🦇 Dark Hangar — UAV Flight Log Analyzer
+# Flight Log Analyzer — ArduPilot DataFlash Log Viewer
 
-Dark Hangar is a premium, self-contained **desktop application** designed for analyzing ArduPilot DataFlash binary logs (`.BIN`). The software features a custom retro-noir × glowing aviation dashboard aesthetic, combining modern telemetry visualization with high-fidelity exporting capabilities.
+Self-contained desktop application for analyzing ArduPilot DataFlash binary logs (`.BIN`). Features telemetry visualization with 3D globe replay and PDF/KML export.
 
----
+## Features
 
-## 🚀 Key Features
+- **Log Parsing**: Reads ArduPilot `.BIN` / `.log` files; extracts GPS, BARO, ARSP, POWR, VIBE, BAT, IMU, RC, NTUN, and more.
+- **Telemetry Dashboard**: Gauges (airspeed, altitude, voltage), timeline with play button, resizable chart + map split.
+- **3D Flight Replay**: Cesium-based globe with terrain and flight path.
+- **Flight Statistics**: Distance, duration, energy, efficiency, max/avg speed, max/min altitude, battery health, vibration analysis.
+- **PDF Export**: Multi-page analytical summary with charts and metrics.
+- **KML Export**: GPS track for Google Earth.
+- **Bulk Scan**: Scan directories for `.BIN`/`.log` files and import in one click.
+- **Vibration Analysis**: FFT-based spectral analysis from IMU data.
 
-* **Interactive Instrument Panel**: Real-time animated gauges tracking airspeed, altitude, battery voltage, active current draw, and total power output.
-* **Timeline Playback**: Interactive timeline slider allowing users to scrub through the entire flight logs to correlate throttle events (`CTUN`), flight modes (`MODE`), and vehicle arming flags.
-* **GPS Ground Track Map**: Interactive dark-themed Leaflet-based map visualizing GPS coordinate plots, speeds, and climb metrics.
-* **Themed PDF Flight Reports**: Generates high-resolution multi-page analytical summaries matching the Dark Hangar theme (dark navy pages, gold grids, custom speed/alt profiles, battery health status, and vibration spectral analyses).
-* **MATLAB Telemetry Exporter**: Instant flat binary `.mat` exporter utilizing SciPy to allow direct loading of flight coordinates and battery metrics into MATLAB.
-* **Persistent History database**: Automatic SQLite persistence of uploaded logs, computed metrics, events, and timeseries data in the local environment.
+## Quick Start
 
----
+### Prerequisites
 
-## 🛠️ Technology Stack
+- Python 3.11+
+- Node.js 20+
 
-| Layer | Technologies Used |
-|---|---|
-| **App Shell** | `pywebview` (Native OS window rendering) |
-| **Backend API** | FastAPI + Uvicorn server (running as a concurrent thread) |
-| **Log Parser** | `pymavlink` DataFlash LogReader |
-| **Database** | SQLite + SQLAlchemy |
-| **Frontend UI** | React + Vite + Vanilla CSS (Custom retro design tokens) |
-| **Data Viz** | `canvas-gauges` + `Recharts` + `Leaflet.js` |
-| **PDF Generation** | `Matplotlib` (statically bundled) |
-| **Data Science Export**| `SciPy` (MATLAB `.mat` exporter) |
+### Install
 
----
-
-## ⚙️ Quick Start (Run from Source)
-
-### 1. Prerequisites
-Ensure you have **Python 3.10+** and **Node.js 18+** installed.
-
-### 2. Setup Backend Dependencies
-```powershell
+```bash
+# Backend
 cd backend
 pip install -r requirements.txt
-```
 
-### 3. Setup Frontend UI
-```powershell
-cd frontend
+# Frontend
+cd ../frontend
 npm install
-npm run build
 ```
 
-### 4. Run the Application
-You can run the launcher directly:
-```powershell
-# Double-click the root launch.bat, or:
+### Run (development)
+
+```bash
+# Terminal 1 — backend
 cd backend
-python app_launcher.py
+uvicorn main:app --host 127.0.0.1 --port 8765 --reload
+
+# Terminal 2 — frontend
+cd frontend
+npm run dev
 ```
-A native OS desktop window will open immediately.
 
----
+Open http://localhost:5173 in your browser.
 
-## 📦 Distribute & Rebuild
+### Build for production
 
-To pack the application into a standalone folder and download package:
+```bash
+cd frontend
+npm run build
+cd ../backend
+uvicorn main:app --host 127.0.0.1 --port 8765
+```
 
-1. Double-click **`build.bat`** (or run `./build.bat` in PowerShell).
-2. The compiler will:
-   * Re-bundle the React SPA assets.
-   * Run PyInstaller with the custom dependencies mapped in `DarkHangar.spec`.
-   * Automatically sync your local sqlite database and flight telemetry files.
-   * Generate the package at `backend/dist/DarkHangar/` and compress it to `backend/dist/DarkHangar.zip`.
+Open http://127.0.0.1:8765
 
-### Running the Packaged Executable
-Extract **`DarkHangar.zip`** and double-click **`DarkHangar.exe`** inside the folder to run the application. No dependencies, command-lines, or browsers required!
+### Package as standalone .exe
+
+See `build.py` and `DarkHangar.spec` for PyInstaller configuration.

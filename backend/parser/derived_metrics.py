@@ -9,7 +9,7 @@ from typing import Optional
 
 import numpy as np
 
-log = logging.getLogger("dark_hangar.metrics")
+log = logging.getLogger("flight_analyzer.metrics")
 
 # Vibration health thresholds (m/s²)
 VIBE_WARN = 15.0
@@ -116,10 +116,16 @@ def compute_airspeed_stats(arsp: dict) -> dict:
     }
 
 
-def compute_altitude_stats(baro: dict) -> dict:
+def compute_altitude_stats(baro: dict, gps: dict = None) -> dict:
     alts = np.array(baro.get("alt", []))
+    if len(alts) == 0 and gps is not None:
+        alts = np.array(gps.get("alt", []))
     if len(alts) == 0:
         return {"max": None, "min": None, "climb_rate_max": None, "descent_rate_max": None}
+
+    # Normalize to AGL by subtracting the first (ground) reading
+    ground_alt = float(alts[0])
+    alts = alts - ground_alt
 
     times = np.array(baro.get("time_s", []))
     result = {
@@ -230,10 +236,15 @@ def compute_vibe_health(vibe: dict) -> str:
 def compute_all(parsed: dict) -> dict:
     """
     Compute all derived metrics from a parsed log dict.
-    Returns a flat dict of metric name → value (None if unavailable).
+    Accepts both top-level timeseries layout and nested {timeseries, events} layout.
+    Returns a flat dict of metric name -> value (None if unavailable).
     """
-    ts = parsed.get("timeseries", {})
-    events = parsed.get("events", [])
+    if "timeseries" in parsed:
+        ts = parsed.get("timeseries", {})
+        events = parsed.get("events", [])
+    else:
+        ts = parsed
+        events = parsed.get("events", [])
 
     bat = ts.get("bat", {})
     gps = ts.get("gps", {})
@@ -245,7 +256,7 @@ def compute_all(parsed: dict) -> dict:
     duration = compute_duration_min(events, ts)
     energy = compute_energy_wh(bat)
     airspeed_stats = compute_airspeed_stats(arsp)
-    alt_stats = compute_altitude_stats(baro)
+    alt_stats = compute_altitude_stats(baro, gps)
     bat_stats = compute_battery_stats(bat)
     glide = compute_glide_ratio(bat, gps, baro)
     vibe_health = compute_vibe_health(vibe)

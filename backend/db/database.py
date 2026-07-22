@@ -1,5 +1,5 @@
 """
-SQLite database initialization and connection management for Dark Hangar.
+SQLite database initialization and connection management.
 """
 import os
 import sys

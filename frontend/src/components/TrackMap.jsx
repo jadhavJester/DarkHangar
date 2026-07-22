@@ -37,7 +37,7 @@ export default function TrackMap({ track = [], currentTime = 0, onTimeChange }) 
       });
 
       L.tileLayer(
-        'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+        'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
         {
           attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>',
           subdomains: 'abcd',
@@ -82,12 +82,7 @@ export default function TrackMap({ track = [], currentTime = 0, onTimeChange }) 
 
   return (
     <div style={{ position: 'relative', width: '100%', height: '100%' }}>
-      {/* Bat watermark */}
-      <div className="bat-watermark">
-        <svg viewBox="0 0 200 100" width="60%" fill="white">
-          <path d="M100 60 C60 40, 20 80, 0 60 C20 20, 60 0, 100 30 C140 0, 180 20, 200 60 C180 80, 140 40, 100 60Z" />
-        </svg>
-      </div>
+
       <div
         ref={mapRef}
         style={{ width: '100%', height: '100%', borderRadius: '0 0 12px 12px', zIndex: 2 }}
@@ -106,12 +101,12 @@ export default function TrackMap({ track = [], currentTime = 0, onTimeChange }) 
 // ── Helpers ────────────────────────────────────────────────────────────────
 
 function _altColor(alt, minAlt, maxAlt) {
-  if (maxAlt === minAlt) return '#f2c30f';
+  if (maxAlt === minAlt) return '#b8860b';
   const t = Math.max(0, Math.min(1, (alt - minAlt) / (maxAlt - minAlt)));
-  // Blue (low) → Yellow (high)
-  const r = Math.round(50  + t * (242 - 50));
-  const g = Math.round(100 + t * (195 - 100));
-  const b = Math.round(220 + t * (15  - 220));
+  // Blue (low) → Gold (high)
+  const r = Math.round(60  + t * (184 - 60));
+  const g = Math.round(130 + t * (134 - 130));
+  const b = Math.round(200 + t * (11  - 200));
   return `rgb(${r},${g},${b})`;
 }
 
@@ -142,15 +137,15 @@ function _drawTrack(L, map, track, markerRef, polylineRef, onTimeChange) {
 
   // Start marker (green)
   const startIcon = L.divIcon({
-    html: '<div style="width:10px;height:10px;border-radius:50%;background:#2f9e44;border:2px solid #0b0d10;box-shadow:0 0 6px rgba(47,158,68,0.8)"></div>',
+    html: '<div style="width:10px;height:10px;border-radius:50%;background:#3a7d4a;border:2px solid #f5efe3;box-shadow:0 0 8px rgba(58,125,74,0.6)"></div>',
     className: '', iconAnchor: [5, 5],
   });
   L.marker([track[0].lat, track[0].lng], { icon: startIcon }).addTo(map)
     .bindTooltip('Start', { className: 'leaflet-tooltip-dark' });
 
-  // Moving marker (yellow)
+  // Moving marker (gold)
   const markerIcon = L.divIcon({
-    html: '<div style="width:14px;height:14px;border-radius:50%;background:#f2c30f;border:2px solid #0b0d10;box-shadow:0 0 10px rgba(242,195,15,0.9)"></div>',
+    html: '<div style="width:14px;height:14px;border-radius:50%;background:#b8860b;border:2px solid #f5efe3;box-shadow:0 0 12px rgba(184,134,11,0.8)"></div>',
     className: '', iconAnchor: [7, 7],
   });
   const marker = L.marker([track[0].lat, track[0].lng], { icon: markerIcon }).addTo(map);

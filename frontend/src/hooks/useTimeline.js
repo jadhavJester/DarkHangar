@@ -36,9 +36,16 @@ export function useTimeline(timeseries, duration) {
     return values[lo] + frac * (values[hi] - values[lo]);
   }, []);
 
+  const groundAlt = useMemo(() => {
+    const baro = getSeries('baro') || getSeries('altitude');
+    const gps = getSeries('gps');
+    return baro?.alt?.[0] ?? baro?.altitude?.[0] ?? gps?.alt?.[0] ?? gps?.altitude?.[0] ?? 0;
+  }, [getSeries]);
+
   const gaugeValues = useMemo(() => {
     if (!timeseries) return {};
     const t = currentTime;
+    const ga = groundAlt;
 
     const batSeries = getSeries('bat') || getSeries('battery');
     const gpsSeries = getSeries('gps');
@@ -47,9 +54,11 @@ export function useTimeline(timeseries, duration) {
     const attSeries = getSeries('att') || getSeries('attitude');
     const ctunSeries = getSeries('ctun');
 
+    const _alt = (raw) => raw != null ? Math.max(0, raw - ga) : null;
+
     return {
-      airspeed: interpolate(arspSeries, 'airspeed', t) ?? interpolate(arspSeries, 'asp', t) ?? interpolate(arspSeries, 'arsp', t),
-      altitude:  interpolate(baroSeries, 'alt', t) ?? interpolate(baroSeries, 'altitude', t),
+      airspeed: interpolate(arspSeries, 'airspeed', t) ?? interpolate(arspSeries, 'asp', t) ?? interpolate(arspSeries, 'arsp', t) ?? interpolate(gpsSeries, 'spd', t) ?? interpolate(gpsSeries, 'speed', t),
+      altitude:  _alt(interpolate(baroSeries, 'alt', t) ?? interpolate(baroSeries, 'altitude', t) ?? interpolate(gpsSeries, 'alt', t) ?? interpolate(gpsSeries, 'altitude', t)),
       voltage:   interpolate(batSeries, 'volt', t) ?? interpolate(batSeries, 'voltage', t) ?? interpolate(batSeries, 'v', t),
       current:   interpolate(batSeries, 'curr', t) ?? interpolate(batSeries, 'current', t) ?? interpolate(batSeries, 'c', t),
       power:     (() => {
@@ -63,10 +72,10 @@ export function useTimeline(timeseries, duration) {
       throttle:  interpolate(ctunSeries, 'thr_out', t) ?? interpolate(ctunSeries, 'thr', t),
       gps_lat:   interpolate(gpsSeries, 'lat', t),
       gps_lng:   interpolate(gpsSeries, 'lng', t),
-      gps_alt:   interpolate(gpsSeries, 'alt', t),
+      gps_alt:   _alt(interpolate(gpsSeries, 'alt', t)),
       gps_spd:   interpolate(gpsSeries, 'spd', t) ?? interpolate(gpsSeries, 'speed', t),
     };
-  }, [timeseries, currentTime, interpolate, getSeries]);
+  }, [timeseries, currentTime, interpolate, getSeries, groundAlt]);
 
   return { currentTime, setCurrentTime, gaugeValues };
 }

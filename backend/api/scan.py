@@ -17,7 +17,7 @@ from parser.derived_metrics import compute_all
 from db.models import insert_flight, insert_events, get_all_flights
 from db.database import db_session
 
-log = logging.getLogger("dark_hangar.scan")
+log = logging.getLogger("flight_analyzer.scan")
 
 router = APIRouter(prefix="/flights", tags=["scan"])
 
