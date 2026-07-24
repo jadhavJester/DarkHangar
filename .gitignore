@@ -1,0 +1,48 @@
+# Dependencies
+node_modules/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+.eggs/
+venv/
+.venv/
+
+# Build outputs
+dist/
+build/
+*.egg
+*.spec.bak
+build_output.log
+build_errors.log
+backend/static/
+
+# Data (user uploads)
+backend/data/temp/*
+backend/data/timeseries/*
+!backend/data/temp/.gitkeep
+!backend/data/timeseries/.gitkeep
+
+# Distribution
+distribution/
+DarkHangarV2.zip
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+
+# Environment
+.env
+.env.local
