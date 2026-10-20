@@ -1,0 +1,14 @@
+# Normalize line endings in the repository
+* text=auto eol=lf
+
+# Windows scripts must keep CRLF to run reliably in cmd.exe
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Binary data — never normalize or diff as text
+*.BIN binary
+*.bin binary
+*.mat binary
+*.png binary
+*.jpg binary
+*.ico binary
