@@ -46,3 +46,6 @@ desktop.ini
 # Environment
 .env
 .env.local
+
+# Test / tooling caches
+.pytest_cache/
