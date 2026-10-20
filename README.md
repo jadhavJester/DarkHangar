@@ -210,6 +210,17 @@ Light cream glassmorphism UI with:
 
 ---
 
+## Testing
+
+The backend has a pytest suite covering the log parser, the derived
+metrics, the export helpers, and API smoke tests:
+
+```bash
+cd backend
+pip install -r requirements.txt -r requirements-dev.txt
+python -m pytest
+```
+
 ## License
 
 Internal use.
